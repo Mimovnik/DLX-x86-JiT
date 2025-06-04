@@ -121,6 +121,21 @@ void DLXJITx64::writeMul(Reg64 dest, Reg64 reg1)
 	rawCode.push_back(0xAF);
 	writeModRM(REGISTER, dest, reg1);
 }
+
+void DLXJITx64::writeCmp(Reg64 dest, int32_t imm32)
+{
+	writeREXPrefix(true, false, false, dest > 0x7);
+	rawCode.push_back(0x81);
+	writeModRM(REGISTER, 7, dest);
+	serialize(rawCode, imm32);
+}
+
+void DLXJITx64::writeJGE(int32_t offset)
+{
+	rawCode.push_back(0x0f);
+	rawCode.push_back(0x8d);
+	serialize(rawCode, offset);
+}
 // -ADDED
 
 void DLXJITx64::writeREXPrefix(bool W, bool R, bool X, bool B)
@@ -462,6 +477,27 @@ void DLXJITx64::compileDLXInstruction(const DLXJITCodLine& line)
 			writeSub(RAX, instr->immediate());
 			writeMovReg32toMem32(getDLXRegisterOffsetOnStack(destination), RBP, EAX);
 		}
+	}
+	else if (line.textInstruction->opcode() == "BRGE")
+	{
+		shared_ptr<DLXJTypeTextInstruction> instr =
+			dynamic_pointer_cast<DLXJTypeTextInstruction>(line.textInstruction);
+		int branch = getDLXRegisterNumber(instr->branchRegister());
+		writeMovSXDMem32toReg64(RAX, getDLXRegisterOffsetOnStack(branch),RBP);
+
+		writeCmp(RAX, 0);
+		int32_t offset = 0;
+		auto destDlxInstr = labelDictionary[instr->label()];
+		if (dlxOffsetsInRawCode.size() > destDlxInstr)
+    {
+			offset = dlxOffsetsInRawCode[destDlxInstr] - (rawCode.size() + 6);
+    }
+		else
+    {
+			jumpOffsetsToRepair.push_back({ instr, rawCode.size() });
+    }
+
+	  writeJGE(offset);
 	}
   // -ADDED
 	else
