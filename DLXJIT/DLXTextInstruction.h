@@ -70,6 +70,9 @@ private:
 public:
 	DLXJTypeTextInstruction(const std::string& opcode, const std::string& branchRegister, const std::string& label);
 	DLXJTypeTextInstruction(std::string&& opcode, std::string&& branchRegister, std::string&& label);
+  // ADDED
+	DLXJTypeTextInstruction(std::string&& opcode, std::string&& label);
+  // -ADDED
 	virtual const std::string& label();
 	virtual const std::string& branchRegister();
 	std::string toString() override;

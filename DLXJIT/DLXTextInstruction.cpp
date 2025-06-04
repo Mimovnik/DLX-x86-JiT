@@ -62,6 +62,11 @@ shared_ptr<DLXTextInstruction> DLXTextInstruction::parse(const string& text)
 	if (tokens.size() == 2 && isRegisterName(tokens[0]) && !isRegisterName(tokens[1]) && !isHexNumber(tokens[1]))
 		return shared_ptr<DLXTextInstruction>(new DLXJTypeTextInstruction(std::move(opcode), std::move(tokens[0]), std::move(tokens[1])));
 
+  // ADDED
+	if (tokens.size() == 1 && !isRegisterName(tokens[0]) && !isHexNumber(tokens[0]))
+		return shared_ptr<DLXTextInstruction>(new DLXJTypeTextInstruction(std::move(opcode), std::move(tokens[0])));
+
+  // -ADDED
 	string message = "Unknown instruction format: " + text;
 	throw DLXJITException(message.c_str());
 }
@@ -196,8 +201,13 @@ DLXJTypeTextInstruction::DLXJTypeTextInstruction(const std::string& opcode, cons
 DLXJTypeTextInstruction::DLXJTypeTextInstruction(std::string&& opcode, std::string&& branchRegister, std::string&& label)
 	: DLXRTypeTextInstruction(std::move(opcode), { std::move(branchRegister) }), label_(std::move(label))
 {
-
 }
+
+DLXJTypeTextInstruction::DLXJTypeTextInstruction(std::string &&opcode, std::string &&label)
+	: DLXRTypeTextInstruction(std::move(opcode), {}), label_(std::move(label))
+{
+}
+
 const std::string& DLXJTypeTextInstruction::label()
 {
 	return label_;
@@ -211,7 +221,11 @@ const std::string& DLXJTypeTextInstruction::branchRegister()
 string DLXJTypeTextInstruction::toString()
 {
 	stringstream str;
-	str << opcode() << "\t" << branchRegister() << ", " << label_;
+
+	if (numberOfRegisters() == 0)
+		str << opcode() << "\t" << label_;
+	else
+		str << opcode() << "\t" << branchRegister() << ", " << label_;
 
 	return str.str();
 }

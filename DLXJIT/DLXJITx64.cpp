@@ -100,6 +100,14 @@ std::size_t DLXJITx64::getDataMemorySize()
 	return data.size();
 }
 
+// ADDED
+void DLXJITx64::writeJMP(int32_t offset)
+{
+    rawCode.push_back(0xE9);
+    serialize(rawCode, offset);
+}
+// -ADDED
+
 void DLXJITx64::writeREXPrefix(bool W, bool R, bool X, bool B)
 {
 	REXPrefixByte byte(W, R, X, B);
@@ -380,7 +388,26 @@ void DLXJITx64::compileDLXInstruction(const DLXJITCodLine& line)
 	else if (line.textInstruction->opcode() == "NOP")
 	{
 		//NOP ;)
-	}
+	} // ADDED
+	else if (line.textInstruction->opcode() == "JMP")
+	{
+	    shared_ptr<DLXJTypeTextInstruction> instr = dynamic_pointer_cast<DLXJTypeTextInstruction>(line.textInstruction);
+	    int32_t offset = 0;
+	    
+	    // Check if the label exists in the dictionary
+	    auto labelIter = labelDictionary.find(instr->label());
+	    if (labelIter == labelDictionary.end()) {
+	        string message = "Unknown label in JMP instruction: " + instr->label();
+	        throw DLXJITException(message.c_str());
+	    }
+	    
+	    auto destDlxInstr = labelIter->second;
+	    if (dlxOffsetsInRawCode.size() > destDlxInstr)
+	        offset = dlxOffsetsInRawCode[destDlxInstr] - (rawCode.size() + 5);
+	    else
+	        jumpOffsetsToRepair.push_back({ instr, rawCode.size() }); //Skok w przód!
+	    writeJMP(offset);
+	} // -ADDED
 	else
 	{
 		string message = "Unsupported DLX opcode: " + line.textInstruction->opcode();
@@ -415,6 +442,13 @@ void DLXJITx64::compile()
 	{
 		auto destDlxInstr = labelDictionary[toRepair.dlxInstruction->label()];
 		auto destInRawCode = dlxOffsetsInRawCode[destDlxInstr];
+
+    // ADDED
+    bool isJMP = toRepair.dlxInstruction->opcode() == "JMP";
+    int offsetAdjustment = isJMP ? 5 : 6;
+    int offsetPosition = isJMP ? 1 : 2;
+    // -ADDED
+
 		int32_t offset = destInRawCode - (toRepair.jumpInstructionOffset + 6);
 
 		char* jumpInstructionLocation = &rawCode[toRepair.jumpInstructionOffset];

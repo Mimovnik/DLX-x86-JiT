@@ -143,6 +143,10 @@ class DLXJITx64 :
 
 	void compile();
 
+  // ADDED
+	void writeJMP(int32_t offset);
+  // -ADDED
+
 	void writeREXPrefix(bool W, bool R, bool X, bool B);
 	void writeModRM(uint8_t mod, uint8_t r, uint8_t rm);
 	void writeSIB(uint8_t scale, uint8_t index, uint8_t base);
