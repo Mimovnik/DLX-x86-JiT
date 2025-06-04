@@ -106,6 +106,13 @@ void DLXJITx64::writeJMP(int32_t offset)
     rawCode.push_back(0xE9);
     serialize(rawCode, offset);
 }
+
+
+void DLXJITx64::writeBswap(Reg32 reg1)
+{
+	rawCode.push_back(0x0F);
+	rawCode.push_back(0xC8 + reg1);
+}
 // -ADDED
 
 void DLXJITx64::writeREXPrefix(bool W, bool R, bool X, bool B)
@@ -407,7 +414,22 @@ void DLXJITx64::compileDLXInstruction(const DLXJITCodLine& line)
 	    else
 	        jumpOffsetsToRepair.push_back({ instr, rawCode.size() }); //Skok w przód!
 	    writeJMP(offset);
-	} // -ADDED
+	}
+	else if (line.textInstruction->opcode() == "STW")
+	{
+		shared_ptr<DLXMTypeTextInstruction> instr =
+			dynamic_pointer_cast<DLXMTypeTextInstruction>(line.textInstruction);
+		int source = getDLXRegisterNumber(instr->dataRegister());
+		int index = getDLXRegisterNumber(instr->indexRegister());
+		int offset = instr->baseAddress();
+		writeMovSXDMem32toReg64(RAX, getDLXRegisterOffsetOnStack(source),RBP);
+
+		writeBswap(EAX);
+		writeMovSXDMem32toReg64(RDX, getDLXRegisterOffsetOnStack(index),RBP);
+
+		writeMovReg32toMem32(offset, x1, RDX, DATA_POINTER_REGISTER, EAX);
+	}
+  // -ADDED
 	else
 	{
 		string message = "Unsupported DLX opcode: " + line.textInstruction->opcode();
