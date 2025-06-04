@@ -451,6 +451,18 @@ void DLXJITx64::compileDLXInstruction(const DLXJITCodLine& line)
 			writeMovReg32toMem32(getDLXRegisterOffsetOnStack(destination), RBP, EAX);
 		}
 	}
+	else if (line.textInstruction->opcode() == "SUBI")
+	{
+		shared_ptr<DLXITypeTextInstruction> instr = dynamic_pointer_cast<DLXITypeTextInstruction>(line.textInstruction);
+		int destination = getDLXRegisterNumber(instr->reg(1));
+		if (destination > 0)
+		{
+			int s1 = getDLXRegisterNumber(instr->reg(0));
+			writeMovSXDMem32toReg64(RAX, getDLXRegisterOffsetOnStack(s1), RBP);
+			writeSub(RAX, instr->immediate());
+			writeMovReg32toMem32(getDLXRegisterOffsetOnStack(destination), RBP, EAX);
+		}
+	}
   // -ADDED
 	else
 	{
