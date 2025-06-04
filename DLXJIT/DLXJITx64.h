@@ -146,6 +146,7 @@ class DLXJITx64 :
   // ADDED
 	void writeJMP(int32_t offset);
   void writeBswap(Reg32 reg1);
+  void writeMul(Reg64 dest, Reg64 reg1);
   // -ADDED
 
 	void writeREXPrefix(bool W, bool R, bool X, bool B);

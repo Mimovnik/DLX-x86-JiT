@@ -113,6 +113,14 @@ void DLXJITx64::writeBswap(Reg32 reg1)
 	rawCode.push_back(0x0F);
 	rawCode.push_back(0xC8 + reg1);
 }
+
+void DLXJITx64::writeMul(Reg64 dest, Reg64 reg1)
+{
+	writeREXPrefix(true, dest > 0x7, false, reg1 > 0x7);
+	rawCode.push_back(0x0F);
+	rawCode.push_back(0xAF);
+	writeModRM(REGISTER, dest, reg1);
+}
 // -ADDED
 
 void DLXJITx64::writeREXPrefix(bool W, bool R, bool X, bool B)
@@ -428,6 +436,20 @@ void DLXJITx64::compileDLXInstruction(const DLXJITCodLine& line)
 		writeMovSXDMem32toReg64(RDX, getDLXRegisterOffsetOnStack(index),RBP);
 
 		writeMovReg32toMem32(offset, x1, RDX, DATA_POINTER_REGISTER, EAX);
+	}
+	else if (line.textInstruction->opcode() == "MUL")
+	{
+		shared_ptr<DLXRTypeTextInstruction> instr = dynamic_pointer_cast<DLXRTypeTextInstruction>(line.textInstruction);
+		int destination = getDLXRegisterNumber(instr->reg(2));
+		if (destination > 0)
+		{
+			int s1 = getDLXRegisterNumber(instr->reg(0));
+			int s2 = getDLXRegisterNumber(instr->reg(1));
+			writeMovSXDMem32toReg64(RAX, getDLXRegisterOffsetOnStack(s1), RBP);
+			writeMovSXDMem32toReg64(RDX, getDLXRegisterOffsetOnStack(s2), RBP);
+			writeMul(RAX, RDX);
+			writeMovReg32toMem32(getDLXRegisterOffsetOnStack(destination), RBP, EAX);
+		}
 	}
   // -ADDED
 	else
