@@ -1,12 +1,10 @@
 #pragma once
-#include <exception>
+#include <stdexcept>
 
-class DLXJITException : public std::exception
-{
+class DLXJITException : public std::runtime_error {
 public:
-	DLXJITException();
-	DLXJITException(const char* message);
-	DLXJITException(std::exception& cause);
-
-	~DLXJITException() throw() override;
+    DLXJITException();
+    explicit DLXJITException(const char* message);
+    explicit DLXJITException(const std::runtime_error& cause);
+    virtual ~DLXJITException();
 };

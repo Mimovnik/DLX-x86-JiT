@@ -1,0 +1,31 @@
+[Code Memory Content]
+0000: 44040000 |            | ADDI   R0, 0x0000, R4
+0004: 44010000 |            | ADDI   R0, 0x0000, R1
+0008: 8800005C |            | JMP    endLoop1
+000C: 0C270200 | loop1      | LDW    R7, 0x0200(R1)
+0010: 18870280 |            | STW    R7, 0x0280(R4)
+0014: 44030000 |            | ADDI   R0, 0x0000, R3
+0018: 44850000 |            | ADDI   R4, 0x0000, R5
+001C: 44020000 |            | ADDI   R0, 0x0000, R2
+0020: 88000024 |            | JMP    endLoop2
+0024: 0CA90280 | loop2      | LDW    R9, 0x0280(R5)
+0028: 0C4A02C0 |            | LDW    R10, 0x02C0(R2)
+002C: 252A5800 |            | MUL    R9, R10, R11
+0030: 1C6B1800 |            | ADD    R3, R11, R3
+0034: 44A50004 |            | ADDI   R5, 0x0004, R5
+0038: 48BF003C |            | SUBI   R5, 0x003C, R31
+003C: 841F0004 |            | BRLE   R31, endIf1
+0040: 44050000 |            | ADDI   R0, 0x0000, R5
+0044: 44420004 | endIf1     | ADDI   R2, 0x0004, R2
+0048: 485F003C | endLoop2   | SUBI   R2, 0x003C, R31
+004C: 841FFFD4 |            | BRLE   R31, loop2
+0050: 18230300 |            | STW    R3, 0x0300(R1)
+0054: 48840004 |            | SUBI   R4, 0x0004, R4
+0058: 489F0000 |            | SUBI   R4, 0x0000, R31
+005C: 7C1F0004 |            | BRGE   R31, endIf2
+0060: 4404003C |            | ADDI   R0, 0x003C, R4
+0064: 44210004 | endIf2     | ADDI   R1, 0x0004, R1
+0068: 483F007C | endLoop1   | SUBI   R1, 0x007C, R31
+006C: 841FFF9C |            | BRLE   R31, loop1
+0070: 00000000 |            | NOP    
+0074: 00000000 |            | NOP    

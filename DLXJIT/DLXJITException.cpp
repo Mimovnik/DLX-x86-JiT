@@ -3,17 +3,17 @@
 using namespace std;
 
 DLXJITException::DLXJITException()
-	: exception()
+    : std::runtime_error("Unknown exception")
 {
 }
 
-DLXJITException::DLXJITException(const char * message)
-	: exception(message)
+DLXJITException::DLXJITException(const char* message)
+    : std::runtime_error(message)
 {
 }
 
-DLXJITException::DLXJITException(exception& cause)
-	: exception(cause)
+DLXJITException::DLXJITException(const std::runtime_error& cause)
+    : std::runtime_error(cause.what())
 {
 }
 

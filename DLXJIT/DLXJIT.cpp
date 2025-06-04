@@ -5,7 +5,7 @@
 #include <functional>
 #include "utils.h"
 
-#if defined(_M_X64)
+#if defined(_M_X64) || defined(__x86_64__)
 #include "DLXJITx64.h"
 #else
 #error "No implementation for current architecture"
@@ -178,7 +178,7 @@ DLXJIT::~DLXJIT()
 
 shared_ptr<DLXJIT> DLXJIT::createInstance()
 {
-#if defined(_M_X64)
+#if defined(_M_X64) || defined(__x86_64__)
 	return shared_ptr<DLXJIT>(new DLXJITx64());
 #else
 #error "No implementation for current architecture"
